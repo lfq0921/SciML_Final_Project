@@ -20,3 +20,44 @@ To run the full suite of experiments (baseline ablation, gap extrapolation, and 
 ## Key Results
 * **Data Gap Extrapolation:** The PINN successfully maintains qualitative physical dynamics inside a 20-second data blind spot, outperforming pure data-driven models.
 * **Parameter Discovery:** The network inverted the physical system, discovering the hidden damping coefficient $b \approx 0.5024$ (True: 0.5) from observational data.
+
+
+
+## Mathematical Development
+
+### Governing Equation
+The system is modeled as a **Driven Damped Nonlinear Pendulum**. The second-order ordinary differential equation (ODE) is:
+
+$$\frac{d^2\theta}{dt^2} + b\frac{d\theta}{dt} + \frac{g}{L}\sin(\theta) = F\cos(\omega t)$$
+
+Where:
+- $\theta$: Angular displacement
+- $b$: Damping coefficient ($0.5$)
+- $g/L$: Normalized gravity/length ratio ($1.0$)
+- $F, \omega$: Forcing amplitude ($1.2$) and frequency ($2/3$)
+
+### PINN Formulation
+The core idea is to treat the ODE as a constraint. We define the **Physics Residual** ($f$):
+
+$$f := \frac{d^2\hat{\theta}}{dt^2} + b\frac{d\hat{\theta}}{dt} + \frac{g}{L}\sin(\hat{\theta}) - F\cos(\omega t)$$
+
+The total loss function minimized by the neural network is:
+$$\mathcal{L}_{total} = w_{data}\mathcal{L}_{data} + w_{phys}\mathcal{L}_{phys}$$
+$$\mathcal{L}_{data} = \frac{1}{N}\sum |\hat{\theta}_i - \theta_i|^2, \quad \mathcal{L}_{phys} = \frac{1}{M}\sum |f_j|^2$$
+
+---
+
+## Implementation & Explanations
+
+### Why PINNs?
+In chaotic systems like this, standard Neural Networks (Black-box) fail to extrapolate when data is sparse or noisy. By embedding the ODE into the loss function, the model learns the **underlying physical laws**, allowing it to:
+1. **Fill data gaps** where sensors might fail.
+2. **Discover hidden parameters** (like the damping $b$).
+3. Maintain **physical consistency** even in chaotic regimes.
+
+### Model Architecture
+- **Type:** Multi-Layer Perceptron (MLP)
+- **Layers:** 3 hidden layers with 32 neurons each.
+- **Activation:** `Tanh` (Crucial for computing smooth second-order derivatives).
+- **Optimizer:** Adam ($\eta = 0.005$) for 5000 epochs.
+
