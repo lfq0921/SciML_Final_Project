@@ -42,7 +42,9 @@ The core idea is to treat the ODE as a constraint. We define the **Physics Resid
 $$f := \frac{d^2\hat{\theta}}{dt^2} + b\frac{d\hat{\theta}}{dt} + \frac{g}{L}\sin(\hat{\theta}) - F\cos(\omega t)$$
 
 The total loss function minimized by the neural network is:
+
 $$\mathcal{L}_{total} = w_{data}\mathcal{L}_{data} + w_{phys}\mathcal{L}_{phys}$$
+
 $$\mathcal{L}_{data} = \frac{1}{N}\sum |\hat{\theta}_i - \theta_i|^2, \quad \mathcal{L}_{phys} = \frac{1}{M}\sum |f_j|^2$$
 
 ---
